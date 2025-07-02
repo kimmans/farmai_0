@@ -6,7 +6,7 @@ import { Button } from "~/common/components/ui/button";
 import { getRecommendedQuestions, transcribeAudio } from "../../../services/interview";
 import { loadStrawberryManualYaml, loadPreviousConsultingReports } from "../../../lib/yaml-loader";
 import { getFarmById } from "../../../services/farm";
-import { saveInterviewData } from "../../../services/consulting";
+import { saveInterviewData, getDiagnosisData } from "../../../services/consulting";
 
 export default function ConsultingInterview() {
   const { farmId = "" } = useParams();
@@ -20,24 +20,29 @@ export default function ConsultingInterview() {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [farmData, setFarmData] = useState<any>(null);
+  const [diagnosisData, setDiagnosisData] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // 농장 데이터 로드
+  // 농장 데이터 및 진단 데이터 로드
   useEffect(() => {
-    const loadFarmData = async () => {
+    const loadData = async () => {
       try {
-        const data = await getFarmById(farmId);
-        setFarmData(data);
+        const [farmDataResult, diagnosisDataResult] = await Promise.all([
+          getFarmById(farmId),
+          getDiagnosisData(farmId)
+        ]);
+        setFarmData(farmDataResult);
+        setDiagnosisData(diagnosisDataResult);
       } catch (e) {
-        console.error("농장 데이터 로드 실패:", e);
-        setError("농장 데이터를 불러올 수 없습니다.");
+        console.error("데이터 로드 실패:", e);
+        setError("데이터를 불러올 수 없습니다.");
       }
     };
     if (farmId) {
-      loadFarmData();
+      loadData();
     }
   }, [farmId]);
 
@@ -55,7 +60,7 @@ export default function ConsultingInterview() {
         throw new Error("농장 데이터가 없습니다.");
       }
       
-      const questions = await getRecommendedQuestions(farmData, yaml, previousReports);
+      const questions = await getRecommendedQuestions(farmData, yaml, previousReports, diagnosisData);
       setRecommendedQuestions(questions);
     } catch (e) {
       console.error("질문 추천 실패:", e);
@@ -164,6 +169,13 @@ export default function ConsultingInterview() {
                     </Button>
                   )}
                 </div>
+                
+                {diagnosisData && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm">
+                    <div className="font-medium mb-1">📊 진단 결과 참조</div>
+                    <div>진단 결과를 바탕으로 맞춤형 질문을 추천합니다.</div>
+                  </div>
+                )}
                 
                 {showRecommendations && recommendedQuestions.length > 0 && (
                   <div className="mb-6 space-y-2">

@@ -78,17 +78,47 @@ export default function ConsultingReport() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [farmData, setFarmData] = useState<any>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepStatus, setStepStatus] = useState({
+    dataAnalysis: false,
+    diagnosisAnalysis: false,
+    interviewAnalysis: false,
+    reportWriting: false
+  });
 
   useEffect(() => {
     const loadReport = async () => {
       try {
         setIsLoading(true);
-        const farm = await getFarmById(farmId);
-        setFarmData(farm);
         
-        // 컨설팅 보고서 생성
-        const generatedReport = await generateConsultingReport(farm, farmId);
-        setReport(generatedReport);
+        // 단계별 진행 시뮬레이션
+        const simulateSteps = async () => {
+          // 1단계: 데이터 분석 (2초)
+          setCurrentStep(0);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setStepStatus(prev => ({ ...prev, dataAnalysis: true }));
+          
+          // 2단계: 진단결과 분석 (2초)
+          setCurrentStep(1);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setStepStatus(prev => ({ ...prev, diagnosisAnalysis: true }));
+          
+          // 3단계: 인터뷰 내용 분석 (2초)
+          setCurrentStep(2);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setStepStatus(prev => ({ ...prev, interviewAnalysis: true }));
+          
+          // 4단계: 보고서 작성 (나머지 시간)
+          setCurrentStep(3);
+          const farm = await getFarmById(farmId);
+          setFarmData(farm);
+          
+          const generatedReport = await generateConsultingReport(farm, farmId);
+          setReport(generatedReport);
+          setStepStatus(prev => ({ ...prev, reportWriting: true }));
+        };
+        
+        await simulateSteps();
       } catch (e) {
         console.error("보고서 생성 실패:", e);
         setError("보고서를 생성할 수 없습니다.");
@@ -117,8 +147,93 @@ export default function ConsultingReport() {
         <Navigation isLoggedIn={true} />
         <main className="container mx-auto px-4 pt-32">
           <div className="text-center py-20">
+            {/* 움직이는 로딩 아이콘 */}
+            <div className="flex justify-center mb-8">
+              <div className="relative">
+                {/* 바깥쪽 원 */}
+                <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin">
+                  <div className="w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+                {/* 중앙 아이콘 */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-2xl">📊</div>
+                </div>
+              </div>
+            </div>
+            
             <div className="text-2xl font-bold mb-4">보고서 생성 중...</div>
-            <div className="text-muted-foreground">AI가 컨설팅 보고서를 작성하고 있습니다.</div>
+            <div className="text-muted-foreground mb-6">AI가 컨설팅 보고서를 작성하고 있습니다.</div>
+            
+            {/* 진행 단계 표시 */}
+            <div className="max-w-md mx-auto">
+              <div className={`flex items-center justify-between text-sm mb-2 ${
+                stepStatus.dataAnalysis ? 'text-green-600' : currentStep === 0 ? 'text-blue-600 font-medium' : 'text-muted-foreground'
+              }`}>
+                <span>데이터 분석</span>
+                {stepStatus.dataAnalysis ? (
+                  <span className="text-green-600">✓</span>
+                ) : currentStep === 0 ? (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">⏳</span>
+                )}
+              </div>
+              
+              <div className={`flex items-center justify-between text-sm mb-2 ${
+                stepStatus.diagnosisAnalysis ? 'text-green-600' : currentStep === 1 ? 'text-blue-600 font-medium' : 'text-muted-foreground'
+              }`}>
+                <span>진단결과 분석</span>
+                {stepStatus.diagnosisAnalysis ? (
+                  <span className="text-green-600">✓</span>
+                ) : currentStep === 1 ? (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">⏳</span>
+                )}
+              </div>
+              
+              <div className={`flex items-center justify-between text-sm mb-2 ${
+                stepStatus.interviewAnalysis ? 'text-green-600' : currentStep === 2 ? 'text-blue-600 font-medium' : 'text-muted-foreground'
+              }`}>
+                <span>인터뷰 내용 분석</span>
+                {stepStatus.interviewAnalysis ? (
+                  <span className="text-green-600">✓</span>
+                ) : currentStep === 2 ? (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">⏳</span>
+                )}
+              </div>
+              
+              <div className={`flex items-center justify-between text-sm ${
+                stepStatus.reportWriting ? 'text-green-600' : currentStep === 3 ? 'text-blue-600 font-medium' : 'text-muted-foreground'
+              }`}>
+                <span>보고서 작성</span>
+                {stepStatus.reportWriting ? (
+                  <span className="text-green-600">✓</span>
+                ) : currentStep === 3 ? (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">⏳</span>
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>

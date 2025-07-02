@@ -46,12 +46,19 @@ interface ExtendedFarmData extends Farm {
 }
 
 export async function getFarms() {
+  console.log("Fetching farms from Supabase...");
+  
   const { data, error } = await supabase
     .from("farms")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching farms:", error);
+    throw error;
+  }
+  
+  console.log("Farms data:", data);
   return data as Farm[];
 }
 

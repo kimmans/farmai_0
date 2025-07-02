@@ -8,7 +8,7 @@ export default function Home() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('public/images/main_image.png')",
+          backgroundImage: "url('images/main_image.png')",
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background" />

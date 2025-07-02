@@ -191,10 +191,6 @@ export default function ConsultingDataForm({ dataType, formData, onChange, onSub
           onClose={() => setShowCamera(false)}
         />
       )}
-
-      <Button type="submit" disabled={isSubmitting} className="w-full mt-4">
-        {isSubmitting ? "저장 중..." : "다음"}
-      </Button>
     </form>
   );
 } 

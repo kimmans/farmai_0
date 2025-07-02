@@ -35,9 +35,25 @@ export default function ConsultingData() {
       if (!isLastStep) {
         navigate(`/consulting/${farmId}/data/${steps[currentStepIdx + 1].id}`);
       } else {
-        navigate(`/consulting/${farmId}/interview`);
+        navigate(`/consulting/${farmId}/diagnosis`);
       }
     }, 500);
+  };
+
+  const handleSkip = () => {
+    if (!isLastStep) {
+      navigate(`/consulting/${farmId}/data/${steps[currentStepIdx + 1].id}`);
+    } else {
+      navigate(`/consulting/${farmId}/diagnosis`);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStepIdx > 0) {
+      navigate(`/consulting/${farmId}/data/${steps[currentStepIdx - 1].id}`);
+    } else {
+      navigate(`/consulting/${farmId}`);
+    }
   };
 
   return (
@@ -59,12 +75,22 @@ export default function ConsultingData() {
                 isSubmitting={isSubmitting}
               />
             </CardContent>
-            <CardFooter className="flex justify-end">
-              {!isLastStep && (
-                <Button variant="outline" onClick={() => navigate(`/consulting/${farmId}/data/${steps[currentStepIdx + 1].id}`)}>
-                  다음 단계로
+            <CardFooter className="flex flex-col gap-2">
+              <div className="flex justify-between w-full">
+                <Button variant="outline" onClick={handlePrevious}>
+                  이전
                 </Button>
-              )}
+                <Button onClick={handleSubmit} disabled={isSubmitting}>
+                  다음
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={() => navigate(`/consulting/${farmId}/diagnosis`)}
+              >
+                건너뛰기
+              </Button>
             </CardFooter>
           </Card>
         </div>

@@ -1,6 +1,8 @@
 import { CONSULTING_PROMPTS } from "~/common/prompts/consul_prompt";
 import { loadStrawberryManualYaml, loadPreviousConsultingReports } from "../lib/yaml-loader";
 import { getConsultingDate } from "../features/pages/consulting/consulting-detail";
+import { supabase } from "../lib/supabase";
+import type { ConsultingSession } from "../+types/consulting";
 
 interface ConsultingReport {
   consultingInfo: {
@@ -70,12 +72,17 @@ interface ConsultingReport {
 // 인터뷰 데이터 저장 (실제로는 DB에 저장)
 export async function saveInterviewData(farmId: string, interviews: { question: string; answer: string }[]) {
   // TODO: 실제 DB 저장 로직 구현
-  localStorage.setItem(`interview_${farmId}`, JSON.stringify(interviews));
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(`interview_${farmId}`, JSON.stringify(interviews));
+  }
 }
 
 // 인터뷰 데이터 불러오기
 export async function loadInterviewData(farmId: string): Promise<{ question: string; answer: string }[]> {
   // TODO: 실제 DB에서 불러오기 로직 구현
+  if (typeof window === 'undefined') {
+    return [];
+  }
   const saved = localStorage.getItem(`interview_${farmId}`);
   return saved ? JSON.parse(saved) : [];
 }
@@ -498,4 +505,48 @@ function generateDefaultReport(farmData: any): ConsultingReport {
       ]
     }
   };
+}
+
+// 농장별 컨설팅 세션 가져오기
+export async function getConsultingSessionsByFarmId(farmId: string): Promise<ConsultingSession[]> {
+  try {
+    const { data, error } = await supabase
+      .from('consulting_sessions')
+      .select('*')
+      .eq('farm_id', farmId)
+      .order('visit_date', { ascending: false });
+
+    if (error) {
+      console.error('컨설팅 세션 조회 오류:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('컨설팅 세션 조회 중 오류:', error);
+    return [];
+  }
+}
+
+// 진단 데이터 가져오기
+export async function getDiagnosisData(farmId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('consulting_diagnosis')
+      .select('*')
+      .eq('farm_id', farmId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('진단 데이터 조회 실패:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('진단 데이터 조회 중 오류:', error);
+    return null;
+  }
 } 

@@ -1,7 +1,7 @@
 import { CONSULTING_PROMPTS } from "~/common/prompts/consul_prompt";
 
 // 질문 추천 (GPT-4)
-export async function getRecommendedQuestions(farmData: any, yaml: string, previousReports: string[]): Promise<{ id: string; question: string; reason: string }[]> {
+export async function getRecommendedQuestions(farmData: any, yaml: string, previousReports: string[], diagnosisData?: any): Promise<{ id: string; question: string; reason: string }[]> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   if (!apiKey) {
     console.warn("OpenAI API 키가 없어서 기본 질문을 반환합니다.");
@@ -18,6 +18,7 @@ export async function getRecommendedQuestions(farmData: any, yaml: string, previ
 농장 데이터: ${JSON.stringify(farmData, null, 2)}
 딸기 매뉴얼: ${yaml}
 기존 컨설팅 기록: ${previousReports.join("\n")}
+${diagnosisData ? `진단 결과: ${JSON.stringify(diagnosisData, null, 2)}` : ''}
 
 다음 JSON 형식으로 정확히 답변해주세요:
 [
@@ -46,7 +47,7 @@ export async function getRecommendedQuestions(farmData: any, yaml: string, previ
         messages: [
           { 
             role: "system", 
-            content: "당신은 농업 전문 컨설턴트입니다. 요청된 JSON 형식으로만 답변하세요." 
+            content: "당신은 농업 전문 컨설턴트입니다. 농가 데이터와 진단 결과를 참고하여 농가의 약점이나 개선점에 대해 구체적인 질문을 추천해주세요. 요청된 JSON 형식으로만 답변하세요." 
           },
           { role: "user", content: prompt },
         ],
