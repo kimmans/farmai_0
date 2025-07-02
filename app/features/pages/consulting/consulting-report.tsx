@@ -268,6 +268,9 @@ export default function ConsultingReport() {
           <Button variant="outline" onClick={() => navigate(`/consulting/${farmId}/interview`)}>
             ← 인터뷰로 돌아가기
           </Button>
+          <Button variant="outline" onClick={() => navigate(`/consulting/${farmId}`)}>
+            농가 기본정보로 돌아가기
+          </Button>
         </div>
 
         {/* A4 보고서 */}
@@ -277,7 +280,6 @@ export default function ConsultingReport() {
             {/* 헤더 */}
             <div className="text-center mb-8 border-b pb-6">
               <h1 className="text-3xl font-bold mb-2">농업 컨설팅 보고서</h1>
-              <p className="text-lg text-muted-foreground">Smart Farm Consulting Report</p>
             </div>
 
             {/* 1. 컨설팅 정보 */}
