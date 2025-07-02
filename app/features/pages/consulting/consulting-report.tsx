@@ -4,7 +4,7 @@ import Navigation from "~/common/components/navagation";
 import { Card, CardHeader, CardContent } from "~/common/components/ui/card";
 import { Button } from "~/common/components/ui/button";
 import { getFarmById } from "../../../services/farm";
-import { generateConsultingReport } from "../../../services/consulting";
+import { generateConsultingReport } from "~/services/consulting";
 
 interface ConsultingReport {
   consultingInfo: {
