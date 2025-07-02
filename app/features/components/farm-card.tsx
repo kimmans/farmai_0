@@ -11,7 +11,7 @@ interface FarmCardProps {
 
 export default function FarmCard({ id, name, location, ownerName, lastUpdated }: FarmCardProps) {
   return (
-    <Link to={`/farms/consulting/${id}`}>
+    <Link to={`/consulting/${id}`}>
       <Card className="hover:bg-muted/50 transition-colors">
         <CardHeader>
           <div className="space-y-2">
